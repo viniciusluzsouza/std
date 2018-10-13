@@ -1,4 +1,5 @@
 import zmq
+from sys import argv
 
 class MatrixCalculator(object):
 	"""docstring for MatrixCalculator"""
@@ -29,13 +30,13 @@ class MatrixCalculator(object):
 		return result
 
 
-	def notify_service_on(service="matrix_calculator"):
+	def notify_service_on(self):
 		context = zmq.Context()
 		p = "tcp://localhost:40008"
 		s = context.socket(zmq.REQ)
 		s.connect(p)
 
-		s.send_json({'cmd': 2, 'service': service})	# CMD to publish service
+		s.send_json({'cmd': 2, 'service': 'matrix_calculator'})	# CMD to publish service
 		resp = s.recv_json()
 
 
@@ -46,7 +47,10 @@ class MatrixCalculator(object):
 
 		while True:
 			rec = self.receiver.recv_json()
-			print("rec: %s" % str(rec))
+			
+			if 'id' in rec and rec['id'] == 0:
+				break
+
 			msg = {}
 			if 'id' not in rec:
 				msg['ack'] = 0
@@ -74,6 +78,10 @@ class MatrixCalculator(object):
 
 
 if __name__ == "__main__":
-	matrix_calc = MatrixCalculator('localhost', '50010', 'localhost', '50012')
+	if len(argv) < 2:
+		print("Pass server IP as a parameter. eg.: ./matrix_calculator.py 10.10.10.1")
+		exit()
+
+	matrix_calc = MatrixCalculator(argv[1], '50010', argv[1], '50012')
 	print("Waiting a job ...")
 	matrix_calc.run()

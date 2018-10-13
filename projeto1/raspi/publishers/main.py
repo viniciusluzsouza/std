@@ -34,7 +34,7 @@ class MainPublisher(object):
 
 
 	def get_ip(self):
-		return "10.10.10.1"
+		return "192.168.0.32"
 
 
 	def run_test(self):
@@ -69,6 +69,9 @@ class MainPublisher(object):
 
 
 	def run(self):
+		if not self.ip_pub.send_ip():
+			print("Fail to send ip")
+
 		local_context = zmq.Context()
 		local_p = "tcp://*:40008"
 		local_s = local_context.socket(zmq.REP)
