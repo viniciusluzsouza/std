@@ -99,7 +99,7 @@ class MainClass(object):
 			elif cmd == MainClass.GET_SERVICES:
 				services_lock.acquire()
 				msg['services'] = deepcopy(services_manager.services)
-				finder_lock.release()
+				services_lock.release()
 
 			elif cmd == MainClass.EXIT:
 				services_lock.acquire()

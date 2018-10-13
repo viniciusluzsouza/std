@@ -49,7 +49,7 @@ class ServicesManager(Thread):
 					# for test, always connect in localhost
 					self.p = "tcp://" + 'localhost' + ":" + host['port']
 				else:
-					self.p = "tcp://" + str(host['ip']) + ":" + str(self.port)
+					self.p = "tcp://" + str(host['ip']) + ":" + host['port']
 
 				try:
 					self.sock.connect(self.p)

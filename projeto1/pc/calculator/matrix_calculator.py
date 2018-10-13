@@ -2,6 +2,7 @@ from sys import argv
 from distributor import Distributor
 from collector import Collector
 from random import randint
+import zmq
 
 class DistributedMatrixCalculator(object):
 	"""docstring for MatrixCalculator"""
@@ -72,6 +73,10 @@ class DistributedMatrixCalculator(object):
 		self.divided_matrices = {'A1': A1, 'A2': A2, 'A3': A3, 'A4': A4, 'B1': B1, 'B2': B2}
 
 
+	def end_all(self):
+		distributor = Distributor("*", "50010")
+		distributor.send_jobs([{'id': 0}])
+
 	def _create_jobs(self):
 		jobs = []
 		jobs.append({'id': 'A1B1', 'a': self.divided_matrices['A1'], 'b': self.divided_matrices['B1']})
@@ -81,7 +86,21 @@ class DistributedMatrixCalculator(object):
 		return jobs
 
 
-	def _get_hosts_on(self):
+	def _check_services(self, show=0):
+		context = zmq.Context()
+		p = "tcp://localhost:40007"
+		s = context.socket(zmq.REQ)
+		s.connect(p)
+
+		s.send_json({'cmd': 2})	# CMD to get services
+		resp = s.recv_json()
+
+		# Show only for test
+		if show:
+			print("services: %s" % str(resp))
+
+
+	def _get_hosts_on(self, show=0):
 		context = zmq.Context()
 		p = "tcp://localhost:40007"
 		s = context.socket(zmq.REQ)
@@ -90,7 +109,12 @@ class DistributedMatrixCalculator(object):
 		s.send_json({'cmd': 1})	# CMD to get hosts
 		resp = s.recv_json()
 
-		return len(resp)
+		if show:
+			for host in resp['hosts']:
+				print("Host: %s   IP: %s   %s" % (
+					host['hostname'], host['ip'], str('[UP]' if host['is_alive'] else '[DOWN]')))
+
+		return len(resp['hosts'])
 
 
 	def _print_matrix(self, matrix):
@@ -115,10 +139,9 @@ class DistributedMatrixCalculator(object):
 			print(line)
 
 
-
 	def run(self):
 		print("==== Checking hosts on ====")
-		num_hosts = self._get_hosts_on()
+		num_hosts = self._get_hosts_on(1)
 		print("Hosts ON: %d" % num_hosts)
 
 		print("==== Creating random matrices ====")
@@ -132,6 +155,10 @@ class DistributedMatrixCalculator(object):
 		distributor = Distributor("*", "50010")
 		collector = Collector("*", "50012", 5000)
 		distributor.send_jobs(self._create_jobs())
+
+		# For test, check services in rasp's
+		self._check_services(1)
+
 		results = collector.collect(4)
 
 		if 'err' in results:
@@ -169,8 +196,10 @@ if __name__ == "__main__":
 		exit()
 
 	matrix_calculator = DistributedMatrixCalculator(workers, lines_a, columns_a, lines_b, columns_b)
-	print("Press Enter when the workers are ready: ")
-	_ = raw_input()
-	print("Initializing ...")
-
-	matrix_calculator.run()
+	print("Press Enter when the workers are ready or 'q' to close all workers: ")
+	cmd = raw_input()
+	if cmd.lower() == 'q':
+		matrix_calculator.end_all()
+	else:
+		print("Initializing ...")
+		matrix_calculator.run()
