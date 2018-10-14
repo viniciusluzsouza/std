@@ -97,7 +97,10 @@ class DistributedMatrixCalculator(object):
 
 		# Show only for test
 		if show:
-			print("services: %s" % str(resp))
+			print("\n==== Showing services (TEST) ====")
+			for key in resp['services'].keys():
+				print("Host: %s   Services: %s" % (str(key), (','.join(resp['services'][key]))))
+			print("=================================\n")
 
 
 	def _get_hosts_on(self, show=0):
@@ -110,9 +113,11 @@ class DistributedMatrixCalculator(object):
 		resp = s.recv_json()
 
 		if show:
+			print("\n==== Showing hosts on (TEST) ====")
 			for host in resp['hosts']:
 				print("Host: %s   IP: %s   %s" % (
 					host['hostname'], host['ip'], str('[UP]' if host['is_alive'] else '[DOWN]')))
+			print("=================================\n")
 
 		return len(resp['hosts'])
 
@@ -141,6 +146,8 @@ class DistributedMatrixCalculator(object):
 
 	def run(self):
 		print("==== Checking hosts on ====")
+		# Here we can block by online workers (only run if haver 4 workers),
+		# but we can work with less then 4 workers, and in my test, I have only 1.
 		num_hosts = self._get_hosts_on(1)
 		print("Hosts ON: %d" % num_hosts)
 
@@ -193,6 +200,10 @@ if __name__ == "__main__":
 
 	if columns_a != lines_b:
 		print("Only matrixes [NxM] x [MxP] can be multiply!")
+		exit()
+
+	if workers != 4:
+		print("Sorry, only work with 4 workers")
 		exit()
 
 	matrix_calculator = DistributedMatrixCalculator(workers, lines_a, columns_a, lines_b, columns_b)
