@@ -29,6 +29,13 @@ class MatrixCalculator(object):
 
 		return result
 
+	def notify_service_off(self):
+		context = zmq.Context()
+		p = "tcp://localhost:40008"
+		s = context.socket(zmq.REQ)
+		s.connect(p)
+
+		s.send_json({'cmd': 3, 'service': 'matrix_calculator'})	# CMD to delete service
 
 	def notify_service_on(self):
 		context = zmq.Context()
@@ -49,6 +56,7 @@ class MatrixCalculator(object):
 			rec = self.receiver.recv_json()
 			
 			if 'id' in rec and rec['id'] == 0:
+
 				break
 
 			msg = {}

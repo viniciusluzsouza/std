@@ -4,7 +4,8 @@ from ip_publisher import IPPublisher
 from services_publisher import ServicesPublisher
 from time import sleep
 import zmq
-import sys
+from os import sys
+import subprocess
 
 
 class MainPublisher(object):
@@ -30,12 +31,11 @@ class MainPublisher(object):
 
 
 	def get_hostname(self):
-		return "RaspA"
-
+		return subprocess.check_output(['hostname'])
 
 	def get_ip(self):
-		return "192.168.0.32"
-
+		# Don't know a beatiful way to get ip address :(
+		pass
 
 	def run_test(self):
 		if not self.ip_pub.send_ip():
@@ -116,7 +116,7 @@ class MainPublisher(object):
 
 
 if __name__ == '__main__':
-	if len(sys.argv) > 2:
+	if len(sys.argv) > 3:
 		if len(sys.argv) < 4:
 			print("Pass hostname and IP as param. eg: ./main.py host1 10.10.10.1 50009")
 			exit()
@@ -127,11 +127,12 @@ if __name__ == '__main__':
 			m = MainPublisher(server="localhost", port=port, hostname=hostname, ip=ip)
 			m.run_test()
 	else:
-		if len(sys.argv) == 1:
-			print("Pass server IP as argument to run in work mode. eg: ./main.py 10.10.10.1")
+		if len(sys.argv) < 3:
+			print("Pass server IP as and your IP as argument to run in work mode. eg: ./main.py 10.10.10.1")
+			print("./main.py <server_ip> <your_ip>")
 			exit()
 
-		m = MainPublisher(server=sys.argv[1], port="50008")
+		m = MainPublisher(server=sys.argv[1], port="50008", ip=sys.argv[2])
 		m.run()
 
 
