@@ -1,0 +1,54 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1561.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    span.Apple-tab-span {white-space:pre}
+  </style>
+</head>
+<body>
+<p class="p1">################################## README ##################################</p>
+<p class="p2"><br></p>
+<p class="p1">O sistema conta com dois projetos, o gerenciador (manager) de Raspberry’s e o calculador de matrizes. Os dois projetos estão divididos entre “pc”, que deve ser executado no computador e “raspi”, que deve ser executado nos Raspberry’s. Os executáveis são os seguintes:</p>
+<p class="p2"><br></p>
+<p class="p1">Raspberry Manager (PC): main.py (pacote raspi_manager)</p>
+<p class="p1">Raspberry Manager (Raspberry): main.py (pacote publishers)</p>
+<p class="p1">Matrix Calculator (PC): matrix_calculator.py (pacote calculator)</p>
+<p class="p1">Matrix Calculator (Raspberry): matrix_calculator_raspi.py (pacote calculator)</p>
+<p class="p2"><br></p>
+<p class="p1">O projeto Raspberry Manager deve ser executado antes de qualquer outro projeto e, se possível, deve ser incluído na inicialização do sistema. A sequência de execução sugerida é a seguinte: Raspberry Manager PC e Raspberry, seguido de Matrix Calculator PC e Raspberry.</p>
+<p class="p2"><br></p>
+<p class="p1">O sistema utiliza as seguintes portas:</p>
+<p class="p1">Raspberry Manager (PC): 50007 para localizar os Raspberrys e 40007 para interface de comunicação com outros processos (internos)</p>
+<p class="p1">Raspberry Manager (Raspberry): 50008 para divulgação dos serviços em execução e 40008 para interface de comunicação com outros processos (internos)</p>
+<p class="p1">Matrix Calculator (PC): 50010 para divulgação dos trabalhos a serem feitos e 50012 para coletar o que for processado</p>
+<p class="p1">Matrix Calculator (Raspberry): conecta nas portas do Matrix Calculator PC e do raspberry manager para divulgação da inicialização do processo</p>
+<p class="p2"><br></p>
+<p class="p1">O sistema Matrix Calculator possui um timeout de 5 segundos para processamento dos cálculos de matriz, que pode ser alterado de acordo com o tamanho das matrizes a serem calculadas (deve ser alterado via time de desenvolvimento). Além disso, caso ocorra qualquer falha nos cálculos, em qualquer máquina, o cálculo todo é invalidado.</p>
+<p class="p2"><br></p>
+<p class="p1">O IP do computador servidor está implementado “hard coded”, esta implementação foi feita para testes, e para funcionamento “no mundo real” é necessário que o servidor (PC) possua um IP de DNS conhecido. E, por consequência, esse IP deverá ser alterado no código.</p>
+<p class="p2"><br></p>
+<p class="p1">O processo Matrix Calculator em cada Raspberry deve ser finalizado através do Matrix Calculator que é executado no PC. Ao executar o processo principal no PC, há uma orientação para passar o comando ‘q’ para finalizar o processo nos Raspberry.</p>
+<p class="p2"><br></p>
+<p class="p1">Para finalizar os processos do projeto Raspberry Manager no PC, execute o programa exit_manager.py, e para finalizar o processo no Raspberry, execute o programa publisher_exit.py. Ambos enviam um comando de EXIT para o socket local do processo.</p>
+<p class="p2"><br></p>
+<p class="p1">As interfaces oferecidas pelos processos gerenciadores são:</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space"> </span>- Raspberry Manager (PC) - socket local porta 40007</p>
+<p class="p1"><span class="Apple-tab-span">	</span>GET_HOSTS = 1<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Retorna hosts que publicaram seu IP (JSON)</p>
+<p class="p1"><span class="Apple-tab-span">	</span>GET_SERVICES = 2<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Retorna os serviços em execução em cada host (JSON)</p>
+<p class="p1"><span class="Apple-tab-span">	</span>EXIT = 0<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Retorna ACK e finaliza o programa</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space"> </span>- Raspberry Manager (Raspberry) - societário local porta 40008</p>
+<p class="p1"><span class="Apple-tab-span">	</span>PUBLISH_IP = 1<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Publica o IP local</p>
+<p class="p1"><span class="Apple-tab-span">	</span>PUBLISH_SERVICE = 2<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Publica um novo serviço</p>
+<p class="p1"><span class="Apple-tab-span">	</span>DELETE_SERVICE = 3<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Publica a remoção de um serviço de execução</p>
+<p class="p1"><span class="Apple-tab-span">	</span>EXIT = 0<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span># Retorna ACK e finaliza o programa</p>
+</body>
+</html>
