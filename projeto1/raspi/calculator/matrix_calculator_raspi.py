@@ -55,9 +55,13 @@ class MatrixCalculator(object):
 		while True:
 			rec = self.receiver.recv_json()
 			
-			if 'id' in rec and rec['id'] == 0:
+			if 'id' in rec:
+				# Show only for monitoring ...
+				print("Received matrix %s to calculate" % str(rec['id']).upper())
+				if rec['id'] == 0:
+					self.notify_service_off()
+					break
 
-				break
 
 			msg = {}
 			if 'id' not in rec:
@@ -86,10 +90,7 @@ class MatrixCalculator(object):
 
 
 if __name__ == "__main__":
-	if len(argv) < 2:
-		print("Pass server IP as a parameter. eg.: ./matrix_calculator.py 10.10.10.1")
-		exit()
-
-	matrix_calc = MatrixCalculator(argv[1], '50010', argv[1], '50012')
+	# Hard coded server (here will dns-name server)
+	matrix_calc = MatrixCalculator("192.168.0.32", '50010', "192.168.0.32", '50012')
 	print("Waiting a job ...")
 	matrix_calc.run()

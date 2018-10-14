@@ -15,27 +15,13 @@ class MainPublisher(object):
 	DELETE_SERVICE = 3
 	EXIT = 0
 
-	def __init__(self, server, port, hostname=None, ip=None):
-		if hostname is None:
-			self.hostname = self.get_hostname()
-		else:
-			self.hostname = hostname
-
-		if ip is None:
-			self.ip = self.get_ip()
-		else:
-			self.ip = ip
-
-		self.ip_pub = IPPublisher(host=server, port="50007", hostname=self.hostname, ip=self.ip, rasp_port=port)
+	def __init__(self, server, port):
+		self.hostname = self.get_hostname()
+		self.ip_pub = IPPublisher(host=server, port="50007", hostname=self.hostname, rasp_port=port)
 		self.service_pub = ServicesPublisher(ip="*", port=port, hostname=self.hostname)
 
-
 	def get_hostname(self):
-		return subprocess.check_output(['hostname'])
-
-	def get_ip(self):
-		# Don't know a beatiful way to get ip address :(
-		pass
+		return subprocess.check_output(['hostname']).rstrip()
 
 	def run_test(self):
 		if not self.ip_pub.send_ip():
@@ -118,7 +104,8 @@ class MainPublisher(object):
 if __name__ == '__main__':
 	if len(sys.argv) > 3:
 		if len(sys.argv) < 4:
-			print("Pass hostname and IP as param. eg: ./main.py host1 10.10.10.1 50009")
+			print("Pass hostname and IP as param to run in test mode.")
+			print("eg: python host1 10.10.10.1 50009")
 			exit()
 		else:
 			ip = sys.argv[2]
@@ -127,12 +114,8 @@ if __name__ == '__main__':
 			m = MainPublisher(server="localhost", port=port, hostname=hostname, ip=ip)
 			m.run_test()
 	else:
-		if len(sys.argv) < 3:
-			print("Pass server IP as and your IP as argument to run in work mode. eg: ./main.py 10.10.10.1")
-			print("./main.py <server_ip> <your_ip>")
-			exit()
-
-		m = MainPublisher(server=sys.argv[1], port="50008", ip=sys.argv[2])
+		# Hard coded server (here will dns-name server)
+		m = MainPublisher(server="192.168.0.32", port="50008")
 		m.run()
 
 
